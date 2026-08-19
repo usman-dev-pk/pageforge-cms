@@ -47,3 +47,7 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create']
 
 Route::post('/reset-password', [ResetPasswordController::class, 'store'])
     ->name('password.update');
+
+Route::get('/page-builder', function () {
+    return view('page-builder');
+})->name('page.builder');

@@ -9,3 +9,18 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+.cms-container {
+    min-height: 100px;
+}
+
+.cms-two-columns {
+    display: flex;
+    gap: 30px;
+}
+
+.cms-column {
+    flex: 1;
+    min-height: 150px;
+    padding: 20px;
+    border: 1px dashed #aaa;
+}
