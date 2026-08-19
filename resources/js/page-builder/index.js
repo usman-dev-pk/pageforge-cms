@@ -1,12 +1,7 @@
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 
-import { basicBlocks } from './blocks/basic';
-import { layoutBlocks } from './blocks/layout';
-import { sectionBlocks } from './blocks/sections';
-
-import { registerLayoutComponents } from './components/layoutComponents';
-import { registerContentComponents } from './components/contentComponents';
+import { addComponentBlocks, registerComponents } from './components/registry';
 
 
 export function createPageBuilder() {
@@ -23,7 +18,12 @@ export function createPageBuilder() {
 
         fromElement: true,
 
-        storageManager: false,
+        storageManager: {
+            type: 'local',
+            autosave: false,
+            autoload: true,
+            options: { local: { key: 'wp-cms-page-builder' } },
+        },
 
 
         // =========================================
@@ -34,6 +34,31 @@ export function createPageBuilder() {
 
             appendTo: '#blocks',
 
+        },
+
+        styleManager: {
+            appendTo: '#styles',
+            sectors: [
+                {
+                    name: 'Layout',
+                    open: true,
+                    properties: [
+                        'display', 'position', 'top', 'right', 'bottom', 'left',
+                        'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height',
+                        'margin', 'padding', 'flex-direction', 'flex-wrap',
+                        'justify-content', 'align-items', 'gap', 'grid-template-columns',
+                    ],
+                },
+                {
+                    name: 'Typography',
+                    properties: [
+                        'color', 'font-family', 'font-size', 'font-weight', 'font-style',
+                        'line-height', 'letter-spacing', 'text-align', 'text-decoration', 'text-transform',
+                    ],
+                },
+                { name: 'Background', properties: ['background-color', 'opacity'] },
+                { name: 'Borders', properties: ['border', 'border-width', 'border-style', 'border-color', 'border-radius', 'box-shadow'] },
+            ],
         },
 
 
@@ -337,24 +362,19 @@ export function createPageBuilder() {
     });
 
 
-    // =========================================
-    // Register Components
-    // =========================================
+    registerComponents(editor);
+    addComponentBlocks(editor);
 
-    // registerLayoutComponents(editor);
+    const status = document.querySelector('#builder-status');
+    const saveButton = document.querySelector('#save-page');
+    saveButton?.addEventListener('click', async () => {
+        await editor.store();
+        if (status) status.textContent = 'Saved just now';
+    });
 
-    // registerContentComponents(editor);
-
-
-    // =========================================
-    // Register Blocks
-    // =========================================
-
-    basicBlocks(editor);
-
-    layoutBlocks(editor);
-
-    sectionBlocks(editor);
+    editor.on('update', () => {
+        if (status) status.textContent = 'Unsaved changes';
+    });
 
 
     return editor;
