@@ -20,17 +20,12 @@
             height: 100vh;
         }
 
-        #blocks,
-        #styles {
+        #blocks {
             width: 250px;
             padding: 15px;
             background: #f5f5f5;
             overflow-y: auto;
             box-sizing: border-box;
-        }
-
-        #styles {
-            border-left: 1px solid #ddd;
         }
 
         #gjs {
@@ -57,12 +52,26 @@
             cursor: pointer;
         }
 
+        .builder-upload {
+            padding: 8px 14px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            color: #1f2937;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        #card-image-input {
+            display: none;
+        }
+
         #builder-status {
             padding: 6px 10px;
             background: rgba(255, 255, 255, .9);
             color: #4b5563;
             font-size: 12px;
         }
+
     </style>
 
 </head>
@@ -75,13 +84,13 @@
 
         <div id="gjs"></div>
 
-        <div id="styles"></div>
-
     </div>
 
     <div class="builder-tools">
         <span id="builder-status">All changes saved locally</span>
         <button id="save-page" type="button">Save page</button>
+        <label class="builder-upload" for="card-image-input">Upload card image</label>
+        <input id="card-image-input" type="file" accept="image/*">
     </div>
 
     @vite('resources/js/page-builder.js')

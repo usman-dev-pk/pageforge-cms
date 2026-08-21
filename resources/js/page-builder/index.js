@@ -1,7 +1,11 @@
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 
-import { addComponentBlocks, registerComponents } from './components/registry';
+import { basicBlocks } from './blocks/basic';
+import { layoutBlocks } from './blocks/layout';
+import { sectionBlocks } from './blocks/sections';
+import { registerContentComponents } from './components/contentComponents';
+import { registerLayoutComponents } from './components/layoutComponents';
 
 
 export function createPageBuilder() {
@@ -22,45 +26,19 @@ export function createPageBuilder() {
             type: 'local',
             autosave: false,
             autoload: true,
-            options: { local: { key: 'wp-cms-page-builder' } },
+            options: { local: { key: 'wp-cms-page-builder-v3' } },
         },
 
 
         // =========================================
         // Block Manager
         // =========================================
-
+                    width: '1200px',
         blockManager: {
 
             appendTo: '#blocks',
 
         },
-
-        styleManager: {
-            appendTo: '#styles',
-            sectors: [
-                {
-                    name: 'Layout',
-                    open: true,
-                    properties: [
-                        'display', 'position', 'top', 'right', 'bottom', 'left',
-                        'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height',
-                        'margin', 'padding', 'flex-direction', 'flex-wrap',
-                        'justify-content', 'align-items', 'gap', 'grid-template-columns',
-                    ],
-                },
-                {
-                    name: 'Typography',
-                    properties: [
-                        'color', 'font-family', 'font-size', 'font-weight', 'font-style',
-                        'line-height', 'letter-spacing', 'text-align', 'text-decoration', 'text-transform',
-                    ],
-                },
-                { name: 'Background', properties: ['background-color', 'opacity'] },
-                { name: 'Borders', properties: ['border', 'border-width', 'border-style', 'border-color', 'border-radius', 'box-shadow'] },
-            ],
-        },
-
 
         // =========================================
         // Style Manager
@@ -237,6 +215,33 @@ export function createPageBuilder() {
         //         {
         //             name: 'Background',
 
+        styleManager: {
+            sectors: [
+                {
+                    name: 'Layout',
+                    open: true,
+                    properties: [
+                        'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height',
+                        'margin', 'padding', 'display', 'position', 'top', 'right', 'bottom', 'left',
+                    ],
+                },
+                {
+                    name: 'Typography',
+                    properties: [
+                        'font-family', 'font-size', 'font-weight', 'font-style',
+                        'line-height', 'letter-spacing', 'text-align', 'color',
+                    ],
+                },
+                {
+                    name: 'Background',
+                    properties: ['background-color', 'opacity'],
+                },
+                {
+                    name: 'Borders',
+                    properties: ['border', 'border-radius', 'box-shadow'],
+                },
+            ],
+        },
         //             open: false,
 
         //             properties: [
@@ -332,7 +337,7 @@ export function createPageBuilder() {
 
                     name: 'Desktop',
 
-                    width: '100%',
+                    width: '',
                 },
 
                 {
@@ -362,11 +367,102 @@ export function createPageBuilder() {
     });
 
 
-    registerComponents(editor);
-    addComponentBlocks(editor);
+    registerLayoutComponents(editor);
+    registerContentComponents(editor);
+    basicBlocks(editor);
+    layoutBlocks(editor);
+    sectionBlocks(editor);
+
+    const updateCanvasDeviceClass = () => {
+        const canvasBody = editor.Canvas.getBody();
+        const device = editor.getDevice() || 'desktop';
+
+        if (!canvasBody) return;
+
+        canvasBody.classList.remove('device-desktop', 'device-tablet', 'device-mobile');
+        canvasBody.classList.add(`device-${device}`);
+    };
+
+    editor.on('change:device', updateCanvasDeviceClass);
+    editor.on('load', updateCanvasDeviceClass);
+    updateCanvasDeviceClass();
+
+    let mergingCards = false;
+
+    editor.on('component:add', (component) => {
+        if (mergingCards || component.get('type') !== 'cards') return;
+
+        setTimeout(() => {
+            if (mergingCards || !component.collection) return;
+
+            const cardContainers = editor.getWrapper().findType('cards');
+            const target = cardContainers.find((container) => container.cid !== component.cid);
+
+            if (!target || !component.components().length) return;
+
+            mergingCards = true;
+            component.components().models.slice().forEach((card) => target.append(card));
+            component.remove();
+            mergingCards = false;
+        }, 0);
+    });
+
+    const blocksContainer = document.querySelector('#blocks');
+    blocksContainer?.addEventListener('click', (event) => {
+        const blockElement = event.target.closest('.gjs-block');
+        const blockId = blockElement?.getAttribute('title');
+        const block = blockId ? editor.BlockManager.get(blockId.toLowerCase().replaceAll(' ', '-')) : null;
+
+        if (!block) return;
+
+        const components = editor.addComponents(block.get('content'));
+        const selected = Array.isArray(components) ? components[0] : components;
+
+        if (selected) editor.select(selected);
+    });
+
+    editor.on('component:selected', (component) => {
+        component.set('stylable', true);
+        editor.runCommand('open-sm');
+    });
 
     const status = document.querySelector('#builder-status');
     const saveButton = document.querySelector('#save-page');
+    const cardImageInput = document.querySelector('#card-image-input');
+
+    const getSelectedCardImage = () => {
+        let selected = editor.getSelected();
+
+        while (selected && selected.get('type') !== 'card') {
+            selected = selected.parent();
+        }
+
+        if (!selected) return null;
+
+        return selected.components().models.find((component) => component.get('tagName') === 'img');
+    };
+
+    cardImageInput?.addEventListener('change', (event) => {
+        const file = event.target.files?.[0];
+
+        if (!file || !file.type.startsWith('image/')) return;
+
+        const image = getSelectedCardImage();
+
+        if (!image) {
+            if (status) status.textContent = 'Select a card first';
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            image.addAttributes({ src: reader.result });
+            if (status) status.textContent = 'Image added to card';
+        });
+        reader.readAsDataURL(file);
+        event.target.value = '';
+    });
     saveButton?.addEventListener('click', async () => {
         await editor.store();
         if (status) status.textContent = 'Saved just now';

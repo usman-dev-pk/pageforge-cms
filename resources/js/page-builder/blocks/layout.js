@@ -13,6 +13,8 @@ export function layoutBlocks(editor) {
             </section>
         `,
 
+        activate: true,
+
     });
 
 
@@ -36,6 +38,8 @@ export function layoutBlocks(editor) {
             </div>
         `,
 
+        activate: true,
+
     });
 
         // Cards Block
@@ -48,6 +52,8 @@ export function layoutBlocks(editor) {
         content: {
             type: 'cards',
         },
+
+        activate: true,
 
     });
 

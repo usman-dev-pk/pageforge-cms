@@ -12,27 +12,30 @@ export function registerContentComponents(editor) {
 
                 tagName: 'div',
 
-                classes: ['cms-card'],
+                classes: ['card', 'cms-card'],
 
                 droppable: true,
 
                 components: `
                     <img
-                        src="https://via.placeholder.com/300x160"
+                        class="card-img-top cms-card-image"
+                        src="https://placehold.co/600x360/e2e8f0/334155?text=Card+Image"
                         alt="Card Image"
                     >
 
-                    <h3>
-                        Card Heading
-                    </h3>
+                    <div class="card-body cms-card-body">
+                        <h5 class="card-title cms-card-title">
+                            Card title
+                        </h5>
 
-                    <p>
-                        Card description goes here.
-                    </p>
+                        <p class="card-text cms-card-text">
+                            Some quick example text to build on the card title and make up the bulk of the card's content.
+                        </p>
 
-                    <a href="#">
-                        Read More
-                    </a>
+                        <a href="#" class="btn btn-primary cms-card-button">
+                            Go somewhere
+                        </a>
+                    </div>
                 `,
 
             },
@@ -96,90 +99,161 @@ export function registerContentComponents(editor) {
             grid-template-columns:
                 repeat(3, minmax(0, 1fr));
 
-            gap: 20px;
+            gap: 24px;
 
             width: 100%;
 
             max-width: 100%;
 
-            padding: 20px;
+            padding: 24px;
 
             box-sizing: border-box;
 
+            justify-content: center;
+
+
         }
-
-
-        /* Individual Card */
 
         .cms-card {
 
             width: 100%;
 
+            max-width: 16rem;
+
             min-width: 0;
 
-            max-width: 100%;
+            justify-self: center;
+
+            border-radius: .375rem;
 
             box-sizing: border-box;
 
-            padding: 20px;
+            background: #fff;
 
-            border: 1px solid #ddd;
+            box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
 
-            border-radius: 8px;
+            border: 1px solid #e5e7eb;
 
             overflow: hidden;
 
         }
 
 
+        .cms-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: 0 12px 28px rgba(15, 23, 42, .12);
+
+        }
+
+
         /* Card Image */
 
-        .cms-card img {
+        .cms-card-image {
 
             display: block;
 
             width: 100%;
 
-            max-width: 100%;
-
-            height: 160px;
+            height: 120px;
 
             object-fit: cover;
+
+            border-top-left-radius: calc(.375rem - 1px);
+
+            border-top-right-radius: calc(.375rem - 1px);
 
         }
 
 
-        /* Card Heading */
+        /* Card Body */
 
-        .cms-card h3 {
+        .cms-card-body {
 
-            margin: 15px 0 10px;
+            padding: .75rem;
 
-            font-size: 22px;
+        }
+
+
+        /* Card Title */
+
+        .cms-card-title {
+
+            margin: 0 0 .5rem;
+
+            font-size: 1.1rem;
+
+            line-height: 1.2;
+
+            color: #212529;
 
         }
 
 
         /* Card Paragraph */
 
-        .cms-card p {
+        .cms-card-text {
 
-            margin: 0 0 15px;
+            margin: 0 0 1rem;
 
-            font-size: 15px;
+            font-size: .875rem;
 
-            line-height: 1.6;
+            line-height: 1.5;
+
+            color: #212529;
 
         }
 
 
         /* Card Button */
 
-        .cms-card a {
+        .cms-card-button {
 
             display: inline-block;
 
             text-decoration: none;
+
+            padding: .375rem .75rem;
+
+            border: 1px solid #0d6efd;
+
+            border-radius: .375rem;
+
+            background: #0d6efd;
+
+            color: #fff;
+
+            font-size: .875rem;
+
+            line-height: 1.5;
+
+            font-weight: 400;
+
+        }
+
+
+        .cms-card-button:hover {
+
+            border-color: #0a58ca;
+
+            background: #0a58ca;
+
+        }
+
+
+        /* =====================================
+           Desktop
+        ====================================== */
+
+        @media (min-width: 992px) {
+
+            .cms-cards {
+
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr)) !important;
+
+            }
 
         }
 
@@ -193,7 +267,7 @@ export function registerContentComponents(editor) {
             .cms-cards {
 
                 grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
+                    repeat(2, minmax(0, 1fr)) !important;
 
             }
 
@@ -208,15 +282,32 @@ export function registerContentComponents(editor) {
 
             .cms-cards {
 
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
 
             }
 
-            .cms-card {
+        }
 
-                padding: 15px;
 
-            }
+        .device-desktop .cms-cards {
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr)) !important;
+
+        }
+
+
+        .device-tablet .cms-cards {
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr)) !important;
+
+        }
+
+
+        .device-mobile .cms-cards {
+
+            grid-template-columns: 1fr !important;
 
         }
 
