@@ -32,7 +32,7 @@
                         Create and manage your website pages.
                     </p>
 
-                    <a href="#" class="btn btn-primary">
+                    <a href="{{ route('page.builder') }}" class="btn btn-primary">
                         Manage Pages
                     </a>
                 </div>

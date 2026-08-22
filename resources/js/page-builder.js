@@ -1,3 +1,3 @@
 import { createPageBuilder } from './page-builder/index';
 
-createPageBuilder();
+createPageBuilder(window.pageBuilderInitialPage ?? null);

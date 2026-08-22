@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\PageController;
 
 
 Route::get('/', function () {
@@ -48,6 +49,18 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create']
 Route::post('/reset-password', [ResetPasswordController::class, 'store'])
     ->name('password.update');
 
-Route::get('/page-builder', function () {
-    return view('page-builder');
-})->name('page.builder');
+Route::middleware('auth')->group(function () {
+    Route::get('/page-builder/{page?}', [PageController::class, 'builder'])
+        ->name('page.builder');
+
+    Route::get('/pages', [PageController::class, 'index'])
+        ->name('pages.index');
+    Route::post('/pages', [PageController::class, 'store'])
+        ->name('pages.store');
+    Route::get('/pages/{page}', [PageController::class, 'show'])
+        ->name('pages.show');
+    Route::put('/pages/{page}', [PageController::class, 'update'])
+        ->name('pages.update');
+    Route::get('/pages/{page}/children', [PageController::class, 'children'])
+        ->name('pages.children');
+});

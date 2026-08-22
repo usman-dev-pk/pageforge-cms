@@ -8,7 +8,7 @@ import { registerContentComponents } from './components/contentComponents';
 import { registerLayoutComponents } from './components/layoutComponents';
 
 
-export function createPageBuilder() {
+export function createPageBuilder(initialPage = null) {
 
     const editor = grapesjs.init({
 
@@ -18,7 +18,7 @@ export function createPageBuilder() {
 
         container: '#gjs',
 
-        height: '100vh',
+        height: '100%',
 
         fromElement: true,
 
@@ -33,7 +33,6 @@ export function createPageBuilder() {
         // =========================================
         // Block Manager
         // =========================================
-                    width: '1200px',
         blockManager: {
 
             appendTo: '#blocks',
@@ -337,7 +336,7 @@ export function createPageBuilder() {
 
                     name: 'Desktop',
 
-                    width: '',
+                    width: '1200px',
                 },
 
                 {
@@ -373,6 +372,10 @@ export function createPageBuilder() {
     layoutBlocks(editor);
     sectionBlocks(editor);
 
+    if (initialPage?.builder_data) {
+        editor.loadProjectData(initialPage.builder_data);
+    }
+
     const updateCanvasDeviceClass = () => {
         const canvasBody = editor.Canvas.getBody();
         const device = editor.getDevice() || 'desktop';
@@ -386,26 +389,6 @@ export function createPageBuilder() {
     editor.on('change:device', updateCanvasDeviceClass);
     editor.on('load', updateCanvasDeviceClass);
     updateCanvasDeviceClass();
-
-    let mergingCards = false;
-
-    editor.on('component:add', (component) => {
-        if (mergingCards || component.get('type') !== 'cards') return;
-
-        setTimeout(() => {
-            if (mergingCards || !component.collection) return;
-
-            const cardContainers = editor.getWrapper().findType('cards');
-            const target = cardContainers.find((container) => container.cid !== component.cid);
-
-            if (!target || !component.components().length) return;
-
-            mergingCards = true;
-            component.components().models.slice().forEach((card) => target.append(card));
-            component.remove();
-            mergingCards = false;
-        }, 0);
-    });
 
     const blocksContainer = document.querySelector('#blocks');
     blocksContainer?.addEventListener('click', (event) => {
@@ -429,6 +412,10 @@ export function createPageBuilder() {
     const status = document.querySelector('#builder-status');
     const saveButton = document.querySelector('#save-page');
     const cardImageInput = document.querySelector('#card-image-input');
+    const pageTitleInput = document.querySelector('#page-title');
+    const pageSlugInput = document.querySelector('#page-slug');
+    const pageParentInput = document.querySelector('#page-parent');
+    let currentPageId = initialPage?.id ?? null;
 
     const getSelectedCardImage = () => {
         let selected = editor.getSelected();
@@ -464,8 +451,47 @@ export function createPageBuilder() {
         event.target.value = '';
     });
     saveButton?.addEventListener('click', async () => {
-        await editor.store();
-        if (status) status.textContent = 'Saved just now';
+        const title = pageTitleInput?.value.trim();
+        const slug = pageSlugInput?.value.trim();
+
+        if (!title || !slug) {
+            if (status) status.textContent = 'Enter a page title and slug';
+            return;
+        }
+
+        saveButton.disabled = true;
+        if (status) status.textContent = 'Saving...';
+
+        try {
+            const response = await fetch(currentPageId ? `/pages/${currentPageId}` : '/pages', {
+                method: currentPageId ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+                body: JSON.stringify({
+                    title,
+                    slug,
+                    parent_id: pageParentInput?.value || null,
+                    builder_data: editor.getProjectData(),
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || 'Unable to save page');
+            }
+
+            const payload = await response.json();
+            currentPageId = payload.page.id;
+            await editor.store();
+            if (status) status.textContent = `Saved page #${currentPageId}`;
+        } catch (error) {
+            if (status) status.textContent = error.message;
+        } finally {
+            saveButton.disabled = false;
+        }
     });
 
     editor.on('update', () => {

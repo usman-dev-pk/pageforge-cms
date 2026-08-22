@@ -111,14 +111,20 @@ export function registerContentComponents(editor) {
 
             justify-content: center;
 
+            min-width: 0;
+
+            max-width: 100%;
+
+            grid-auto-flow: row;
+
 
         }
 
         .cms-card {
 
-            width: 100%;
+            width: min(100%, 16rem);
 
-            max-width: 16rem;
+            max-width: 100%;
 
             min-width: 0;
 
@@ -136,6 +142,8 @@ export function registerContentComponents(editor) {
 
             overflow: hidden;
 
+            min-width: 0;
+
         }
 
 
@@ -148,6 +156,15 @@ export function registerContentComponents(editor) {
         }
 
 
+        .cms-card * {
+
+            box-sizing: border-box;
+
+            min-width: 0;
+
+        }
+
+
         /* Card Image */
 
         .cms-card-image {
@@ -155,6 +172,8 @@ export function registerContentComponents(editor) {
             display: block;
 
             width: 100%;
+
+            max-width: 100%;
 
             height: 120px;
 
@@ -173,6 +192,8 @@ export function registerContentComponents(editor) {
 
             padding: .75rem;
 
+            max-width: 100%;
+
         }
 
 
@@ -188,6 +209,10 @@ export function registerContentComponents(editor) {
 
             color: #212529;
 
+            overflow-wrap: anywhere;
+
+            word-break: break-word;
+
         }
 
 
@@ -202,6 +227,12 @@ export function registerContentComponents(editor) {
             line-height: 1.5;
 
             color: #212529;
+
+            max-width: 100%;
+
+            overflow-wrap: anywhere;
+
+            word-break: break-word;
 
         }
 
@@ -229,6 +260,14 @@ export function registerContentComponents(editor) {
             line-height: 1.5;
 
             font-weight: 400;
+
+            max-width: 100%;
+
+            overflow-wrap: anywhere;
+
+            word-break: break-word;
+
+            white-space: normal;
 
         }
 
